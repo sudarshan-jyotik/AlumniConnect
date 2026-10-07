@@ -22,11 +22,12 @@ class Settings(BaseSettings):
     DEBUG: bool = False
 
     # ===== Database =====
-    DATABASE_HOSTNAME: str
+    DATABASE_URL: str | None = None
+    DATABASE_HOSTNAME: str = "localhost"
     DATABASE_PORT: int = 5432
-    DATABASE_PASSWORD: str
-    DATABASE_NAME: str
-    DATABASE_USERNAME: str
+    DATABASE_PASSWORD: str = ""
+    DATABASE_NAME: str = "alumniconnect"
+    DATABASE_USERNAME: str = "postgres"
     DATABASE_POOL_SIZE: int = 10
     DATABASE_MAX_OVERFLOW: int = 20
 

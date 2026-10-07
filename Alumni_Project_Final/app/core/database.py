@@ -9,15 +9,19 @@ from sqlalchemy.orm import sessionmaker
 
 from app.core.config import settings
 
-# URL encode the password
-password = urllib.parse.quote_plus(settings.DATABASE_PASSWORD)
-
 # Create database URL
-SQLALCHEMY_DATABASE_URL = (
-    f"postgresql://{settings.DATABASE_USERNAME}:{password}@"
-    f"{settings.DATABASE_HOSTNAME}:{settings.DATABASE_PORT}/"
-    f"{settings.DATABASE_NAME}"
-)
+if settings.DATABASE_URL:
+    SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
+    if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
+        SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql://", 1)
+else:
+    # URL encode the password
+    password = urllib.parse.quote_plus(settings.DATABASE_PASSWORD)
+    SQLALCHEMY_DATABASE_URL = (
+        f"postgresql://{settings.DATABASE_USERNAME}:{password}@"
+        f"{settings.DATABASE_HOSTNAME}:{settings.DATABASE_PORT}/"
+        f"{settings.DATABASE_NAME}"
+    )
 
 # Create engine with connection pooling
 engine = create_engine(
