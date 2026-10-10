@@ -30,17 +30,21 @@ target_metadata = Base.metadata
 # Override sqlalchemy.url from environment
 import urllib.parse
 
-# encode password safely
-password = urllib.parse.quote_plus(settings.DATABASE_PASSWORD)
-
-# Replace % with %% to escape for configparser
-password = password.replace('%', '%%')
-
-db_url = (
-    f"postgresql://{settings.DATABASE_USERNAME}:{password}@"
-    f"{settings.DATABASE_HOSTNAME}:{settings.DATABASE_PORT}/"
-    f"{settings.DATABASE_NAME}"
-)
+if settings.DATABASE_URL:
+    db_url = settings.DATABASE_URL
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+    db_url = db_url.replace('%', '%%')
+else:
+    # encode password safely
+    password = urllib.parse.quote_plus(settings.DATABASE_PASSWORD)
+    # Replace % with %% to escape for configparser
+    password = password.replace('%', '%%')
+    db_url = (
+        f"postgresql://{settings.DATABASE_USERNAME}:{password}@"
+        f"{settings.DATABASE_HOSTNAME}:{settings.DATABASE_PORT}/"
+        f"{settings.DATABASE_NAME}"
+    )
 
 config.set_main_option("sqlalchemy.url", db_url)
 
