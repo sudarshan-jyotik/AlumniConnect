@@ -13,12 +13,14 @@ from app.core.config import settings
 if settings.DATABASE_URL:
     SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
     if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
-        SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql://", 1)
+        SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql+psycopg2://", 1)
+    elif SQLALCHEMY_DATABASE_URL.startswith("postgresql://"):
+        SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
 else:
     # URL encode the password
     password = urllib.parse.quote_plus(settings.DATABASE_PASSWORD)
     SQLALCHEMY_DATABASE_URL = (
-        f"postgresql://{settings.DATABASE_USERNAME}:{password}@"
+        f"postgresql+psycopg2://{settings.DATABASE_USERNAME}:{password}@"
         f"{settings.DATABASE_HOSTNAME}:{settings.DATABASE_PORT}/"
         f"{settings.DATABASE_NAME}"
     )
