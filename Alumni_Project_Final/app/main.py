@@ -101,15 +101,15 @@ def health_check():
 @app.on_event("startup")
 async def startup_event():
     """Run on application startup."""
-    print(f"🚀 {settings.APP_NAME} v{settings.APP_VERSION} starting...")
-    print(f"📚 API Documentation: http://localhost:8000/docs")
-    print(f"🔧 Debug Mode: {settings.DEBUG}")
+    print(f"[STARTUP] {settings.APP_NAME} v{settings.APP_VERSION} starting...")
+    print(f"[STARTUP] API Documentation: /docs")
+    print(f"[STARTUP] Debug Mode: {settings.DEBUG}")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Run on application shutdown."""
-    print(f"👋 {settings.APP_NAME} shutting down...")
+    print(f"[SHUTDOWN] {settings.APP_NAME} shutting down...")
 
 
 if __name__ == "__main__":
