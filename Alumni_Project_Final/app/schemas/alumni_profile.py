@@ -7,7 +7,7 @@ class AlumniProfileBase(BaseModel):
     current_company_id: Optional[int] = None
     current_position: Optional[str] = Field(None, max_length=200)
     years_of_experience: Optional[int] = Field(None, ge=0)
-    graduation_year: int = Field(ge=1950, le=2030)
+    graduation_year: Optional[int] = Field(None, ge=1950, le=2030)
     degree: Optional[str] = Field(None, max_length=100)
     department: Optional[str] = Field(None, max_length=100)
     linkedin_url: Optional[HttpUrl] = None

@@ -44,8 +44,8 @@ def get_requests(
         # Alumni see approved requests
         requests = service.get_approved_requests(skip, limit)
     else:
-        # Admins see all pending
-        requests = service.repository.get_by_status(RequestStatus.PENDING, skip, limit)
+        # Admins see all requests
+        requests = service.repository.get_all_with_details(skip, limit)
     
     return ApiResponse(
         message="Requests fetched successfully",
@@ -128,3 +128,19 @@ def delete_request(
 ):
     """Delete a request."""
     service.delete_request(request_id, current_user)
+
+
+@router.post("/{request_id}/endorse", response_model=ApiResponse[ReferralRequestOut])
+@limiter.limit("30/minute")
+def endorse_request(
+    request: Request,
+    request_id: int,
+    current_user: User = Depends(get_current_user),
+    service: ReferralRequestService = Depends(get_service),
+):
+    """Endorse a referral request."""
+    endorsed = service.endorse_request(request_id, current_user.id)
+    return ApiResponse(
+        message="Request endorsed successfully",
+        data=endorsed,
+    )

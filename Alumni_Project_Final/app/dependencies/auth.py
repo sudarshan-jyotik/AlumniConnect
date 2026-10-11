@@ -44,7 +44,10 @@ def create_access_token(data: Dict[str, Any]) -> str:
         "exp": expire,
         "iat": datetime.now(timezone.utc),
         "sub": str(data["user_id"]),  # Store as 'sub' (standard JWT claim)
-        "role": data.get("role", "student"),  # ✅ FIX: Include role
+        "role": data.get("role", "student"),  # Include role
+        "user_id": data.get("user_id"),
+        "email": data.get("email"),
+        "full_name": data.get("full_name"),
     })
     
     encoded_jwt: str = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)

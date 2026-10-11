@@ -40,21 +40,36 @@ class AuthService:
         # Generate verification token
         verification_token = secrets.token_urlsafe(32)
 
+        role_val = user_data.role.value if hasattr(user_data.role, 'value') else str(user_data.role).lower()
+
         new_user = User(
             email=user_data.email,
             password=hashed_password,
             full_name=user_data.full_name,
             phone=user_data.phone,
-            role=user_data.role.value if hasattr(user_data.role, 'value') else str(user_data.role).lower(),
+            role=role_val,
             verification_token=verification_token,
-            status=UserStatus.PENDING.value,
+            status=UserStatus.ACTIVE.value,
+            is_email_verified=True,
+            is_active=True,
         )
 
         self.user_repository.create(new_user)
         self.db.commit()
         self.db.refresh(new_user)
 
-        # TODO: Send verification email
+        # If registered as alumni, create an initial alumni profile
+        if role_val == "alumni":
+            from app.models.alumni_profile import AlumniProfile
+            profile = AlumniProfile(
+                user_id=new_user.id,
+                current_position="Alumni Member",
+                bio="Alumni member ready to provide referrals.",
+                is_available=True,
+                is_verified=True,
+            )
+            self.db.add(profile)
+            self.db.commit()
 
         return new_user
 
@@ -68,10 +83,12 @@ class AuthService:
         if not user.is_active:
             raise ForbiddenException("Account is inactive")
 
-        # ✅ FIX: Include role in access token
+        role_str = user.role.value if hasattr(user.role, 'value') else str(user.role)
         access_token = create_access_token({
             "user_id": user.id,
-            "role": user.role.value  # Include role
+            "role": role_str,
+            "email": user.email,
+            "full_name": user.full_name,
         })
 
         refresh_token_value = create_refresh_token({"user_id": user.id})

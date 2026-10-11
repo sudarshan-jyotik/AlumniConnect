@@ -205,19 +205,26 @@ class User(Base):
         return f"<User {self.email} ({self.role})>"
 
     def is_student(self) -> bool:
-        return self.role == UserRole.STUDENT
+        role_val = self.role.value if hasattr(self.role, 'value') else str(self.role)
+        return role_val == UserRole.STUDENT.value
 
     def is_alumni(self) -> bool:
-        return self.role == UserRole.ALUMNI
+        role_val = self.role.value if hasattr(self.role, 'value') else str(self.role)
+        return role_val == UserRole.ALUMNI.value
 
     def is_admin(self) -> bool:
-        return self.role == UserRole.ADMIN
+        role_val = self.role.value if hasattr(self.role, 'value') else str(self.role)
+        return role_val == UserRole.ADMIN.value
 
     def can_create_requests(self) -> bool:
-        return self.role in [UserRole.STUDENT, UserRole.ALUMNI]
+        role_val = self.role.value if hasattr(self.role, 'value') else str(self.role)
+        return role_val in [UserRole.STUDENT.value, UserRole.ALUMNI.value]
 
     def can_submit_referrals(self) -> bool:
-        return self.role == UserRole.ALUMNI and self.status == UserStatus.ACTIVE
+        role_val = self.role.value if hasattr(self.role, 'value') else str(self.role)
+        status_val = self.status.value if hasattr(self.status, 'value') else str(self.status)
+        return role_val == UserRole.ALUMNI.value and status_val == UserStatus.ACTIVE.value
 
     def can_approve_requests(self) -> bool:
-        return self.role == UserRole.ADMIN
+        role_val = self.role.value if hasattr(self.role, 'value') else str(self.role)
+        return role_val == UserRole.ADMIN.value

@@ -30,8 +30,15 @@ const Register = () => {
       toast.success('Registration successful! Please login.');
       navigate('/login');
     },
-    onError: () => {
-      toast.error('Registration failed');
+    onError: (err: any) => {
+      const detail = err?.response?.data?.detail;
+      if (Array.isArray(detail)) {
+        toast.error(detail[0]?.msg || 'Registration failed');
+      } else if (typeof detail === 'string') {
+        toast.error(detail);
+      } else {
+        toast.error('Registration failed');
+      }
     },
   });
 
@@ -56,7 +63,8 @@ const Register = () => {
 
         <div>
           <label className="label">Password</label>
-          <input {...register('password')} className="input" type="password" />
+          <input {...register('password')} className="input" type="password" placeholder="e.g. Pass1234" />
+          <p className="text-xs text-gray-400 mt-1">Min 8 chars, 1 uppercase, 1 lowercase, 1 number</p>
           {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
         </div>
 

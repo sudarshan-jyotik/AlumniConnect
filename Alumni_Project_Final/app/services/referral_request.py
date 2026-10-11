@@ -43,7 +43,8 @@ class ReferralRequestService:
             motivation=request_data.motivation,
             skills_match=request_data.skills_match,
             priority=request_data.priority.value if hasattr(request_data.priority, 'value') else str(request_data.priority).lower(),
-            status=RequestStatus.DRAFT.value,
+            status=RequestStatus.PENDING.value,
+            submitted_at=datetime.now(timezone.utc),
         )
 
         self.repository.create(new_request)
@@ -166,3 +167,28 @@ class ReferralRequestService:
         self.db.commit()
 
         return True
+
+    def endorse_request(self, request_id: int, user_id: int) -> ReferralRequest:
+        """Endorse a referral request."""
+        from app.models.endorsement import Endorsement
+        request = self.get_request(request_id)
+
+        # Check if already endorsed
+        existing = self.db.query(Endorsement).filter(
+            Endorsement.user_id == user_id,
+            Endorsement.request_id == request_id
+        ).first()
+
+        if not existing:
+            endorsement = Endorsement(
+                user_id=user_id,
+                request_id=request_id,
+                strength=5,
+                endorsement_type="technical"
+            )
+            self.db.add(endorsement)
+            request.endorsement_count = (request.endorsement_count or 0) + 1
+            self.db.commit()
+            self.db.refresh(request)
+
+        return request

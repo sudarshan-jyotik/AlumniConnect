@@ -63,26 +63,30 @@ const RequestDetail = () => {
   const request = rawRequest || mockRequest;
 
   const endorseMutation = useMutation({
-    mutationFn: () => Promise.resolve(),
+    mutationFn: () => referralRequestApi.endorse(Number(id)),
     onSuccess: () => {
       toast.success('Thank you! Endorsement registered successfully.');
       queryClient.invalidateQueries({ queryKey: ['referral-request', id] });
     },
-    onError: () => {
-      toast.error('Failed to register endorsement');
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.detail || 'Failed to register endorsement');
     }
   });
 
   const referralMutation = useMutation({
-    mutationFn: () => Promise.resolve(),
+    mutationFn: () => referralRequestApi.submitReferral({
+      request_id: Number(id),
+      notes: referralNotes,
+      confidence_level: confidence,
+    }),
     onSuccess: () => {
       toast.success('Your referral has been successfully recorded!');
       setIsReferralModalOpen(false);
       queryClient.invalidateQueries({ queryKey: ['referral-request', id] });
       navigate('/requests');
     },
-    onError: () => {
-      toast.error('Failed to submit referral');
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.detail || 'Failed to submit referral');
     }
   });
 

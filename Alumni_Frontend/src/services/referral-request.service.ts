@@ -51,4 +51,14 @@ export const referralRequestApi = {
     const response = await apiClient.post(`/referral-requests/${id}/submit`);
     return response.data;
   },
+
+  endorse: async (id: number): Promise<ApiResponse<ReferralRequest>> => {
+    const response = await apiClient.post(`/referral-requests/${id}/endorse`);
+    return response.data;
+  },
+
+  submitReferral: async (data: { request_id: number; notes?: string; confidence_level?: number }): Promise<ApiResponse<any>> => {
+    const response = await apiClient.post('/referral-submissions/', data);
+    return response.data;
+  },
 };
