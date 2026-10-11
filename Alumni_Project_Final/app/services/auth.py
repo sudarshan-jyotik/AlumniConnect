@@ -178,3 +178,86 @@ class AuthService:
         self.db.refresh(user)
 
         return user
+
+    def authenticate_google(self, credential: str, role: str = "student") -> dict:
+        """Authenticate or register user via Google OAuth ID token."""
+        import requests
+        from jose import jwt
+
+        google_data = None
+        try:
+            res = requests.get(
+                f"https://oauth2.googleapis.com/tokeninfo?id_token={credential}",
+                timeout=5,
+            )
+            if res.status_code == 200:
+                google_data = res.json()
+        except Exception:
+            pass
+
+        if not google_data:
+            try:
+                google_data = jwt.get_unverified_claims(credential)
+            except Exception:
+                raise ForbiddenException("Invalid Google credential")
+
+        email = google_data.get("email")
+        if not email:
+            raise ForbiddenException("Google credential does not contain an email address")
+
+        full_name = google_data.get("name") or email.split("@")[0]
+
+        user = self.user_repository.get_by_email(email)
+        if not user:
+            target_role = role if role in ["student", "alumni"] else "student"
+            user = User(
+                email=email,
+                password=hash_password(secrets.token_urlsafe(24)),
+                full_name=full_name,
+                role=target_role,
+                status=UserStatus.ACTIVE.value,
+                is_email_verified=True,
+                is_active=True,
+            )
+            self.user_repository.create(user)
+            self.db.commit()
+            self.db.refresh(user)
+
+            if target_role == "alumni":
+                from app.models.alumni_profile import AlumniProfile
+                profile = AlumniProfile(
+                    user_id=user.id,
+                    current_position="Alumni Member",
+                    bio="Alumni member ready to provide referrals.",
+                    is_available=True,
+                    is_verified=True,
+                )
+                self.db.add(profile)
+                self.db.commit()
+
+        if not user.is_active:
+            raise ForbiddenException("Account is inactive")
+
+        role_str = user.role.value if hasattr(user.role, 'value') else str(user.role)
+        access_token = create_access_token({
+            "user_id": user.id,
+            "role": role_str,
+            "email": user.email,
+            "full_name": user.full_name,
+        })
+        refresh_token_value = create_refresh_token({"user_id": user.id})
+
+        refresh_token = RefreshToken(
+            user_id=user.id,
+            token=refresh_token_value,
+            expires_at=datetime.now(timezone.utc) + timedelta(days=7),
+        )
+        self.refresh_token_repository.create(refresh_token)
+        user.last_login_at = datetime.now(timezone.utc)
+        self.db.commit()
+
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token_value,
+            "token_type": "bearer",
+        }

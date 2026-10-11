@@ -38,59 +38,7 @@ const Companies = () => {
 
   const rawCompanies: any[] = response?.data || [];
 
-  // Fallback companies list for presentation
-  const mockCompanies = [
-    {
-      id: 1,
-      name: 'Google',
-      industry: 'Technology',
-      website: 'https://google.com',
-      careers_page: 'https://careers.google.com',
-      description: 'Google LLC is an American multinational technology company specializing in artificial intelligence, search engine, online advertising, cloud computing, and computer software.',
-      headquarters: 'Mountain View, CA',
-      company_size: '10,000+',
-      request_count: 8,
-      is_active: true
-    },
-    {
-      id: 2,
-      name: 'Microsoft',
-      industry: 'Software',
-      website: 'https://microsoft.com',
-      careers_page: 'https://careers.microsoft.com',
-      description: 'Microsoft Corporation is an American multinational technology corporation head-quartered in Redmond, Washington. Best known for software like Windows, Office, and Azure.',
-      headquarters: 'Redmond, WA',
-      company_size: '10,000+',
-      request_count: 5,
-      is_active: true
-    },
-    {
-      id: 3,
-      name: 'Netflix',
-      industry: 'Entertainment',
-      website: 'https://netflix.com',
-      careers_page: 'https://jobs.netflix.com',
-      description: 'Netflix, Inc. is an American media company based in Los Gatos, California. Offers subscription-based streaming services with award-winning original shows and movies.',
-      headquarters: 'Los Gatos, CA',
-      company_size: '5,000 - 10,000',
-      request_count: 3,
-      is_active: true
-    },
-    {
-      id: 4,
-      name: 'Apple',
-      industry: 'Hardware & Tech',
-      website: 'https://apple.com',
-      careers_page: 'https://careers.apple.com',
-      description: 'Apple Inc. is an American multinational technology company head-quartered in Cupertino, California. Best known for premium products like iPhone, iPad, Mac, and Apple Watch.',
-      headquarters: 'Cupertino, CA',
-      company_size: '10,000+',
-      request_count: 2,
-      is_active: true
-    }
-  ];
-
-  const companies = rawCompanies.length > 0 ? rawCompanies : mockCompanies;
+  const companies = rawCompanies;
 
   const createCompanyMutation = useMutation({
     mutationFn: () => companyApi.create({

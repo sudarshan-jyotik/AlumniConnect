@@ -32,16 +32,7 @@ const CreateRequest = () => {
 
   const rawCompanies = companiesData?.data || [];
 
-  // Fallback companies list if backend is empty
-  const mockCompanies = [
-    { id: 1, name: 'Google' },
-    { id: 2, name: 'Microsoft' },
-    { id: 3, name: 'Amazon' },
-    { id: 4, name: 'Netflix' },
-    { id: 5, name: 'Meta' },
-  ];
-
-  const companies = rawCompanies.length > 0 ? rawCompanies : mockCompanies;
+  const companies = rawCompanies;
 
   const { register, handleSubmit, formState: { errors } } = useForm<RequestForm>({
     resolver: zodResolver(requestSchema),

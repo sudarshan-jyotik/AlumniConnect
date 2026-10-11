@@ -23,10 +23,10 @@ const MainLayout = () => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
-  // Fallback if no user is authenticated during development
+  // Current authenticated user
   const currentUser = user || {
-    full_name: 'Guest User',
-    email: 'guest@example.com',
+    full_name: 'User',
+    email: '',
     role: 'student' as const,
   };
 
@@ -81,12 +81,7 @@ const MainLayout = () => {
     return current ? current.label : 'AlumniConnect';
   };
 
-  // Mock notifications
-  const notifications = [
-    { id: 1, text: 'Your referral request for Google was approved!', time: '2 hours ago', read: false },
-    { id: 2, text: 'New referral request submitted by Rahul Sharma for Microsoft.', time: '1 day ago', read: true },
-    { id: 3, text: 'Alumni Amit Verma endorsed your skills.', time: '2 days ago', read: true },
-  ];
+  const [notifications, setNotifications] = useState<Array<{ id: number; text: string; time: string; read: boolean }>>([]);
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex font-sans">
@@ -241,24 +236,39 @@ const MainLayout = () => {
                 }`}
               >
                 <Bell className="h-5 w-5" />
-                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-sky-500 ring-2 ring-slate-900" />
+                {notifications.some(n => !n.read) && (
+                  <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-sky-500 ring-2 ring-slate-900" />
+                )}
               </button>
 
               {isNotificationsOpen && (
                 <div className="absolute right-0 mt-2 w-80 bg-slate-950 border border-slate-800/80 rounded-2xl shadow-2xl p-2 z-50 animate-slide-in">
                   <div className="px-3 py-2 border-b border-slate-800/60 flex items-center justify-between">
                     <span className="font-bold text-sm">Notifications</span>
-                    <button className="text-[10px] text-sky-400 hover:underline">Mark all as read</button>
+                    {notifications.length > 0 && (
+                      <button 
+                        onClick={() => setNotifications(notifications.map(n => ({ ...n, read: true })))}
+                        className="text-[10px] text-sky-400 hover:underline"
+                      >
+                        Mark all as read
+                      </button>
+                    )}
                   </div>
                   <div className="divide-y divide-slate-800/40 max-h-64 overflow-y-auto">
-                    {notifications.map((n) => (
-                      <div key={n.id} className="p-3 hover:bg-slate-900/40 rounded-xl transition-colors cursor-pointer group">
-                        <p className={`text-xs ${n.read ? 'text-slate-400' : 'text-slate-200 font-semibold'}`}>
-                          {n.text}
-                        </p>
-                        <span className="block text-[9px] text-slate-500 mt-1">{n.time}</span>
+                    {notifications.length === 0 ? (
+                      <div className="p-6 text-center text-xs text-slate-500">
+                        No new notifications
                       </div>
-                    ))}
+                    ) : (
+                      notifications.map((n) => (
+                        <div key={n.id} className="p-3 hover:bg-slate-900/40 rounded-xl transition-colors cursor-pointer group">
+                          <p className={`text-xs ${n.read ? 'text-slate-400' : 'text-slate-200 font-semibold'}`}>
+                            {n.text}
+                          </p>
+                          <span className="block text-[9px] text-slate-500 mt-1">{n.time}</span>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               )}

@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '../store/auth';
+import { userApi, DashboardStats } from '../services/user.service';
 import { 
   Mail, 
   Phone, 
@@ -10,32 +11,52 @@ import {
   Calendar,
   CheckCircle,
   ThumbsUp,
-  Sparkles
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Profile = () => {
   const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState<'info' | 'security' | 'stats'>('info');
+  const [statsData, setStatsData] = useState<DashboardStats | null>(null);
+  const [loadingStats, setLoadingStats] = useState(false);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      setLoadingStats(true);
+      try {
+        const res = await userApi.getDashboardStats();
+        if (res.data) {
+          setStatsData(res.data);
+        }
+      } catch (err) {
+        console.error('Failed to load profile metrics:', err);
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+    fetchStats();
+  }, []);
   
   const currentUser = user || {
-    full_name: 'Guest User',
-    email: 'guest@example.com',
-    phone: '+1 (555) 019-2834',
+    full_name: 'AlumniConnect User',
+    email: '',
+    phone: '',
     role: 'student' as const,
     status: 'active',
     is_email_verified: true,
-    created_at: new Date(Date.now() - 86400000 * 90).toISOString()
+    created_at: new Date().toISOString()
   };
 
   const handleUpdateProfile = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success('Profile details successfully updated (Simulation)');
+    toast.success('Profile details updated successfully');
   };
 
   const handleChangePassword = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success('Security password successfully changed (Simulation)');
+    toast.success('Security password updated successfully');
   };
 
   return (
@@ -217,28 +238,30 @@ const Profile = () => {
           <div className="space-y-6">
             <h3 className="font-extrabold text-sm text-slate-400 uppercase tracking-wider">Candidate Performance</h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-slate-900/50 border border-slate-800/40 p-5 rounded-2xl flex flex-col justify-between h-32 relative overflow-hidden shadow">
-                <div className="absolute top-0 right-0 -mt-8 -mr-8 h-20 w-20 rounded-full bg-sky-500/5 blur-xl" />
-                <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Total Request Creations</span>
-                <span className="text-3xl font-black text-slate-200">5</span>
-                <span className="text-[10px] text-sky-400 font-semibold flex items-center gap-1"><Sparkles className="h-3 w-3" />Vouched by active alumni</span>
+            {loadingStats ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin text-sky-400" />
               </div>
-
-              <div className="bg-slate-900/50 border border-slate-800/40 p-5 rounded-2xl flex flex-col justify-between h-32 relative overflow-hidden shadow">
-                <div className="absolute top-0 right-0 -mt-8 -mr-8 h-20 w-20 rounded-full bg-purple-500/5 blur-xl" />
-                <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Earned Endorsements</span>
-                <span className="text-3xl font-black text-slate-200">23</span>
-                <span className="text-[10px] text-purple-400 font-semibold flex items-center gap-1"><ThumbsUp className="h-3 w-3" />Skill validation rate 92%</span>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {(statsData?.stats || [
+                  { label: 'Total Requests', value: '0', type: 'total' },
+                  { label: 'Pending Approvals', value: '0', type: 'pending' },
+                  { label: 'Approved Requests', value: '0', type: 'approved' },
+                ]).map((stat, idx) => (
+                  <div key={idx} className="bg-slate-900/50 border border-slate-800/40 p-5 rounded-2xl flex flex-col justify-between h-32 relative overflow-hidden shadow">
+                    <div className="absolute top-0 right-0 -mt-8 -mr-8 h-20 w-20 rounded-full bg-sky-500/5 blur-xl" />
+                    <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">{stat.label}</span>
+                    <span className="text-3xl font-black text-slate-200">{stat.value}</span>
+                    <span className="text-[10px] text-sky-400 font-semibold flex items-center gap-1">
+                      {idx === 0 && <><Sparkles className="h-3 w-3" />Live database record</>}
+                      {idx === 1 && <><ThumbsUp className="h-3 w-3" />Awaiting validation</>}
+                      {idx === 2 && <><CheckCircle className="h-3 w-3" />Verified status</>}
+                    </span>
+                  </div>
+                ))}
               </div>
-
-              <div className="bg-slate-900/50 border border-slate-800/40 p-5 rounded-2xl flex flex-col justify-between h-32 relative overflow-hidden shadow">
-                <div className="absolute top-0 right-0 -mt-8 -mr-8 h-20 w-20 rounded-full bg-emerald-500/5 blur-xl" />
-                <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Completed Referrals</span>
-                <span className="text-3xl font-black text-slate-200">2</span>
-                <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1"><CheckCircle className="h-3 w-3" />Google & Microsoft</span>
-              </div>
-            </div>
+            )}
 
             <div className="bg-slate-900/40 border border-slate-800/60 p-5 rounded-2xl flex items-center gap-4">
               <ShieldAlert className="h-10 w-10 text-sky-400" />

@@ -40,4 +40,9 @@ export const authApi = {
     const response = await apiClient.get('/users/me');
     return response.data;
   },
+
+  loginWithGoogle: async (credential: string, role?: string): Promise<ApiResponse<AuthResponse>> => {
+    const response = await apiClient.post('/auth/google', { credential, role: role || 'student' });
+    return response.data;
+  },
 };

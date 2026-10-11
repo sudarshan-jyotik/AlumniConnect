@@ -42,25 +42,7 @@ const RequestDetail = () => {
 
   const rawRequest = response?.data;
 
-  // Premium fallback mock request for development and portfolio purposes
-  const mockRequest = {
-    id: Number(id) || 1,
-    position_title: 'Software Engineer (Frontend)',
-    motivation: 'I have 3 years of React experience and have contributed to open source libraries. I want to join the Search team at Google to work on web performance at scale. This role aligns perfectly with my career path.',
-    skills_match: 'Strong mastery of HTML, CSS, JavaScript, TypeScript, React, Next.js, and state management via Zustand/Redux. Built three production-grade web apps with 10k+ monthly active users.',
-    location: 'Mountain View, CA',
-    status: 'approved',
-    priority: 'high',
-    job_url: 'https://careers.google.com/jobs/results/123456789/',
-    created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
-    view_count: 45,
-    endorsement_count: 8,
-    student_id: 10,
-    student: { id: 10, full_name: 'Anjali Sharma', email: 'anjali@example.com', phone: '+1 (555) 019-2834' },
-    company: { id: 1, name: 'Google', description: 'Google LLC is an American multinational technology company.', website: 'https://google.com' }
-  };
-
-  const request = rawRequest || mockRequest;
+  const request = rawRequest;
 
   const endorseMutation = useMutation({
     mutationFn: () => referralRequestApi.endorse(Number(id)),
@@ -94,6 +76,18 @@ const RequestDetail = () => {
     return (
       <div className="flex justify-center items-center py-24">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-400" />
+      </div>
+    );
+  }
+
+  if (!request) {
+    return (
+      <div className="max-w-4xl mx-auto py-16 text-center text-slate-400">
+        <h2 className="text-xl font-bold text-slate-200">Referral Request Not Found</h2>
+        <p className="text-sm mt-2">The requested referral request does not exist or has been removed.</p>
+        <Link to="/requests" className="inline-block mt-4 text-xs font-bold text-sky-400 hover:underline">
+          &larr; Back to Requests
+        </Link>
       </div>
     );
   }

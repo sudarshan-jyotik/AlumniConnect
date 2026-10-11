@@ -1,6 +1,7 @@
-"""Authentication endpoints."""
+from typing import Optional
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -92,4 +93,24 @@ def verify_email(
     return ApiResponse(
         message="Email verified successfully",
         data=user,
+    )
+
+
+class GoogleAuthRequest(BaseModel):
+    credential: str
+    role: Optional[str] = "student"
+
+
+@router.post("/google", response_model=ApiResponse[Token])
+@limiter.limit("15/minute")
+def login_google(
+    request: Request,
+    data: GoogleAuthRequest,
+    service: AuthService = Depends(get_auth_service),
+):
+    """Authenticate or register via Google OAuth credential."""
+    tokens = service.authenticate_google(data.credential, data.role or "student")
+    return ApiResponse(
+        message="Google login successful",
+        data=tokens,
     )

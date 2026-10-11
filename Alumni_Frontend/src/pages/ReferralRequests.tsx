@@ -27,70 +27,14 @@ const ReferralRequests = () => {
 
   const rawRequests = response?.data || [];
 
-  // Mock requests data for premium fallback in case backend is empty
-  const mockRequests = [
-    {
-      id: 1,
-      position_title: 'Software Engineer (Frontend)',
-      motivation: 'I have 3 years of React experience and have contributed to open source libraries. I want to join the Search team at Google to work on web performance at scale.',
-      location: 'Mountain View, CA',
-      status: 'approved',
-      priority: 'high',
-      created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
-      view_count: 45,
-      endorsement_count: 8,
-      student: { full_name: 'Anjali Sharma', email: 'anjali@example.com' },
-      company: { name: 'Google', logo_url: null }
-    },
-    {
-      id: 2,
-      position_title: 'Backend Developer (Go / Kubernetes)',
-      motivation: 'Passionate about building scalable systems. Familiar with microservice patterns, gRPC, and cloud deployments. Microsoft Azure is doing incredible things, and I want to contribute.',
-      location: 'Seattle, WA (Remote)',
-      status: 'pending',
-      priority: 'urgent',
-      created_at: new Date(Date.now() - 86400000).toISOString(),
-      view_count: 12,
-      endorsement_count: 3,
-      student: { full_name: 'Rahul Verma', email: 'rahul@example.com' },
-      company: { name: 'Microsoft', logo_url: null }
-    },
-    {
-      id: 3,
-      position_title: 'Data Scientist',
-      motivation: 'MS in Data Science with publications in ML. Experienced in Python, PyTorch, and NLP. Eager to work on recommendation systems.',
-      location: 'New York, NY',
-      status: 'fulfilled',
-      priority: 'medium',
-      created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
-      view_count: 88,
-      endorsement_count: 15,
-      student: { full_name: 'Vikram Singh', email: 'vikram@example.com' },
-      company: { name: 'Netflix', logo_url: null }
-    },
-    {
-      id: 4,
-      position_title: 'Product Manager Intern',
-      motivation: 'Founded a campus startup with 500+ active users. Strong analytical skills, user research, and wireframing experience. Apple design philosophy inspires me.',
-      location: 'Cupertino, CA',
-      status: 'rejected',
-      priority: 'low',
-      created_at: new Date(Date.now() - 86400000 * 10).toISOString(),
-      view_count: 5,
-      endorsement_count: 0,
-      student: { full_name: 'Priya Iyer', email: 'priya@example.com' },
-      company: { name: 'Apple', logo_url: null }
-    }
-  ];
-
-  const requests = rawRequests.length > 0 ? rawRequests : mockRequests as any[];
+  const requests = rawRequests;
 
   // Filter requests
   const filteredRequests = requests.filter((req) => {
     const matchesSearch = 
       req.position_title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      req.company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (req.student.full_name && req.student.full_name.toLowerCase().includes(searchTerm.toLowerCase()));
+      (req.company?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (req.student?.full_name || '').toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || req.status === statusFilter;
     const matchesPriority = priorityFilter === 'all' || req.priority === priorityFilter;
